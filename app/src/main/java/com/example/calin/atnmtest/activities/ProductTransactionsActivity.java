@@ -33,7 +33,6 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
 
     String mProductName;
     Cursor mCursor;
-    Cursor mCurrencyCursor;
 
     private static final int CURRENCY_LOADER_ID = 2;
 
@@ -44,12 +43,14 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_transactions);
 
+
         mProductNameTextView = findViewById(R.id.tv_product_name);
         mProductAmountTextView = findViewById(R.id.tv_product_amount);
         mProductCurrencyTextView = findViewById(R.id.tv_product_currency);
         mTotalTextView = findViewById(R.id.tv_total);
 
         CurrencyUtils.setCurrencyContext(this);
+
 
         // Here will be a bunch of TextViews with information passed on from the main activity
         mProductName = getIntent().getStringExtra(MainActivity.EXTRA_PRODUCT_NAME);
@@ -96,7 +97,11 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
         return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
             @Override
             protected void onStartLoading() {
-                forceLoad();
+                if(mCursor == null) {
+                    forceLoad();
+                } else {
+                    deliverResult(mCursor);
+                }
             }
 
             @Override
@@ -115,6 +120,9 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
 
         mCursor = data;
         mProductNameTextView.setText(mProductName);
+        mProductCurrencyTextView.setText("");
+        mProductAmountTextView.setText("");
+
         while (data.moveToNext()) {
 
             String productCurrency = data.getString(data.getColumnIndex(TransactionContract.TransactionsEntry.COLUMN_CURRENCY));
@@ -123,7 +131,9 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
             mProductAmountTextView.append(productAmount + "\n");
 
             // At each iteration, convert product amount to desired currency and add it to total
-            total = total + (CurrencyUtils.getRates(productCurrency, "EUR") * Float.parseFloat(productAmount));
+            float rates = CurrencyUtils.getRates(productCurrency, "EUR");
+            total = total + (rates * Float.parseFloat(productAmount));
+
 
         }
 

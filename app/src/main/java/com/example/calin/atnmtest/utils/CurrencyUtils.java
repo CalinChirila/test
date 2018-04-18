@@ -10,6 +10,7 @@ public class CurrencyUtils {
     static Cursor allCurrencyRatesCursor;
     static Context mContext;
     static float rates = 1;
+    static float returnRates = 1;
 
 
     public static float getRates(String from, String to){
@@ -31,7 +32,9 @@ public class CurrencyUtils {
 
         if(isConvertible){
             rates = rates * Float.parseFloat(currencyCursor.getString(currencyCursor.getColumnIndex(TransactionContract.CurrencyEntry.COLUMN_CURRENCY_RATE)));
-            return rates;
+            returnRates = rates;
+            rates = 1;
+            return returnRates;
         } else {
             currencyCursor.moveToPrevious();
             rates = rates * Float.parseFloat(currencyCursor.getString(currencyCursor.getColumnIndex(TransactionContract.CurrencyEntry.COLUMN_CURRENCY_RATE)));
@@ -49,10 +52,11 @@ public class CurrencyUtils {
             getRates(newFrom, from);
         }
 
-        return rates;
+        return returnRates;
     }
 
     public static void setCurrencyContext(Context context){
         mContext = context;
     }
+
 }

@@ -3,6 +3,7 @@ package com.example.calin.atnmtest.utils;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +19,12 @@ public class JSONUtils {
         JSONArray rootJson = new JSONArray(currencyJson);
 
         ContentResolver contentResolver = context.getContentResolver();
+        // Exit early if we already have data
+        Cursor cursor = contentResolver.query(CurrencyEntry.CONTENT_URI, null, null, null, null);
+        if(cursor.getCount() > 0){
+            cursor.close();
+            return;
+        }
 
         for (int i = 0; i < rootJson.length(); i++) {
             JSONObject currencyObject = rootJson.getJSONObject(i);
@@ -40,6 +47,12 @@ public class JSONUtils {
         try {
             JSONArray rootJson = new JSONArray(transactionsJson);
             ContentResolver contentResolver = context.getContentResolver();
+
+            Cursor cursor = contentResolver.query(TransactionsEntry.CONTENT_URI, null, null, null, null);
+            if(cursor.getCount() > 0){
+                cursor.close();
+                return;
+            }
 
             for (int i = 0; i < rootJson.length(); i++) {
                 JSONObject transactionObject = rootJson.getJSONObject(i);
