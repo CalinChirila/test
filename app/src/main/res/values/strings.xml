@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ATNMTest</string>
+    <string name="title_activity_product_transactions">ProductTransactionsActivity</string>
+</resources>
