@@ -1,6 +1,9 @@
 package com.example.calin.atnmtest.adapters;
 
+import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,21 +14,28 @@ import android.widget.TextView;
 import com.example.calin.atnmtest.R;
 import com.example.calin.atnmtest.data.TransactionContract;
 
+import java.util.ArrayList;
+
 public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ProductsAdapterViewHolder> {
 
-    private Cursor transactionsCursor;
+    private Cursor productsCursor;
     private final ProductsAdapterOnClickHandler mClickHandler;
+    private int productCount;
+    private Context mContext;
 
-    public ProductsAdapter(ProductsAdapterOnClickHandler handler){
+    private ArrayList<String> productsArray;
+
+    public ProductsAdapter(Context context, ProductsAdapterOnClickHandler handler) {
+        mContext = context;
         mClickHandler = handler;
     }
 
-    public interface ProductsAdapterOnClickHandler{
+    public interface ProductsAdapterOnClickHandler {
         void onClick(Cursor cursor);
     }
 
 
-    public class ProductsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ProductsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView mProductNameTextView;
 
         public ProductsAdapterViewHolder(View itemView) {
@@ -38,8 +48,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
 
         @Override
         public void onClick(View v) {
-            transactionsCursor.moveToPosition(getAdapterPosition());
-            mClickHandler.onClick(transactionsCursor);
+            productsCursor.moveToPosition(getAdapterPosition());
+            mClickHandler.onClick(productsCursor);
         }
     }
 
@@ -52,21 +62,35 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
 
     @Override
     public void onBindViewHolder(@NonNull ProductsAdapter.ProductsAdapterViewHolder holder, int position) {
-        transactionsCursor.moveToPosition(position);
 
-        String productName = transactionsCursor.getString(transactionsCursor.getColumnIndex(TransactionContract.TransactionsEntry.COLUMN_PRODUCT_NAME));
+        String productName = productsArray.get(position);
 
         holder.mProductNameTextView.setText(productName);
     }
 
     @Override
     public int getItemCount() {
-        if(transactionsCursor == null) return 0;
-        return transactionsCursor.getCount();
+        return productCount;
     }
 
-    public void setTransactionsData(Cursor data){
-        transactionsCursor = data;
+    public void setTransactionsData(Cursor data) {
+        productsCursor = removeDuplicateProducts(data);
         notifyDataSetChanged();
+    }
+
+    private Cursor removeDuplicateProducts(Cursor cursor) {
+        if (cursor == null || cursor.getCount() == 0) return null;
+        productCount = cursor.getCount();
+        productsArray = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            String productName = cursor.getString(cursor.getColumnIndex(TransactionContract.TransactionsEntry.COLUMN_PRODUCT_NAME));
+            if (productsArray.contains(productName)) {
+                productCount = productCount - 1;
+            } else {
+                productsArray.add(productName);
+            }
+        }
+
+        return cursor;
     }
 }

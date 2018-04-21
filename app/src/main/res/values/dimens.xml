@@ -2,5 +2,7 @@
 <resources>
     <dimen name="products_list_margin">8dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="product_item_padding">16dp</dimen>
+    <dimen name="product_item_padding">8dp</dimen>
+    <dimen name="product_item_margin">4dp</dimen>
+    <dimen name="product_item_width">100dp</dimen>
 </resources>

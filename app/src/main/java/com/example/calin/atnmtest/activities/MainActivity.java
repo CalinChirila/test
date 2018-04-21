@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements ProductsAdapter.P
     private LinearLayoutManager layoutManager;
     private ProductsAdapter mProductsAdapter;
 
+    private Cursor mCursor;
+
     private static final int TRANSACTIONS_LOADER_ID = 1;
 
     public static final String EXTRA_PRODUCT_NAME = "productName";
@@ -55,10 +57,15 @@ public class MainActivity extends AppCompatActivity implements ProductsAdapter.P
         mTransactionsCallback = new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                return new android.content.AsyncTaskLoader<Cursor>(getApplicationContext()) {
+                return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
                     @Override
                     protected void onStartLoading() {
-                        forceLoad();
+                        mCursor = getContentResolver().query(TransactionContract.TransactionsEntry.CONTENT_URI, null, null, null, null);
+                        if(mCursor == null || mCursor.getCount() == 0) {
+                            forceLoad();
+                        } else {
+                            deliverResult(mCursor);
+                        }
                     }
 
                     @Override
@@ -78,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements ProductsAdapter.P
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-                mProductsAdapter = new ProductsAdapter(MainActivity.this);
+                mCursor = data;
+                mProductsAdapter = new ProductsAdapter(getApplicationContext(),MainActivity.this);
                 mProductsAdapter.setTransactionsData(data);
 
                 mRecyclerView.setLayoutManager(layoutManager);
@@ -89,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements ProductsAdapter.P
 
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
-
+                mProductsAdapter.setTransactionsData(null);
             }
         };
 

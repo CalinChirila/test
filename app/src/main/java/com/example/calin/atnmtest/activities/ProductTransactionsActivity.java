@@ -111,6 +111,11 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
                 Cursor cursor = getContentResolver().query(TransactionContract.TransactionsEntry.CONTENT_URI, null, selection, selectionArgs, null);
                 return cursor;
             }
+
+            @Override
+            public void deliverResult(Cursor data) {
+                super.deliverResult(data);
+            }
         };
     }
 
@@ -119,6 +124,8 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
         float total = 0;
 
         mCursor = data;
+
+
         mProductNameTextView.setText(mProductName);
         mProductCurrencyTextView.setText("");
         mProductAmountTextView.setText("");
@@ -131,7 +138,8 @@ public class ProductTransactionsActivity extends AppCompatActivity implements Lo
             mProductAmountTextView.append(productAmount + "\n");
 
             // At each iteration, convert product amount to desired currency and add it to total
-            float rates = CurrencyUtils.getRates(productCurrency, "EUR");
+            CurrencyUtils currencyUtils = new CurrencyUtils();
+            float rates = currencyUtils.getRates(productCurrency, "EUR");
             total = total + (rates * Float.parseFloat(productAmount));
 
 

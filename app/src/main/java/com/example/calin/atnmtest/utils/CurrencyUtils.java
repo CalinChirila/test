@@ -12,8 +12,13 @@ public class CurrencyUtils {
     static float rates = 1;
     static float returnRates = 1;
 
+    //TODO: the getRates method can be improved to make the minimum number of conversions necessary
 
-    public static float getRates(String from, String to){
+    public CurrencyUtils(){
+
+    }
+
+    public float getRates(String from, String to){
         if(from.equals(to)) return 1;
         boolean isConvertible = false;
         // Query currency cursor for all items with value of "to" into the column_currency_to
@@ -36,14 +41,13 @@ public class CurrencyUtils {
             rates = 1;
             return returnRates;
         } else {
-            currencyCursor.moveToPrevious();
+            if(!currencyCursor.moveToNext()) currencyCursor.moveToFirst();
             rates = rates * Float.parseFloat(currencyCursor.getString(currencyCursor.getColumnIndex(TransactionContract.CurrencyEntry.COLUMN_CURRENCY_RATE)));
             if(allCurrencyRatesCursor == null) {
                 allCurrencyRatesCursor = mContext.getContentResolver().query(TransactionContract.CurrencyEntry.CONTENT_URI, null, null, null, null);
             }
             String newFrom;
             if(allCurrencyRatesCursor.moveToNext()) {
-
                 newFrom = allCurrencyRatesCursor.getString(allCurrencyRatesCursor.getColumnIndex(TransactionContract.CurrencyEntry.COLUMN_CURRENCY_FROM));
             } else {
                 allCurrencyRatesCursor.moveToFirst();
